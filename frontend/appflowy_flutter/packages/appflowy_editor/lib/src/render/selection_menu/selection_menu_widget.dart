@@ -34,11 +34,7 @@ class SelectionMenuItem {
   ///
   /// The keywords are used to quickly retrieve items.
   final List<String> keywords;
-  late final void Function(
-    EditorState editorState,
-    SelectionMenuService menuService,
-    BuildContext context,
-  ) handler;
+  late final SelectionMenuItemHandler handler;
 
   void _deleteSlash(EditorState editorState) {
     final selectionService = editorState.service.selectionService;
@@ -54,7 +50,7 @@ class SelectionMenuItem {
         ..deleteText(
           node,
           lastSlashIndex,
-          selection.start.offset - lastSlashIndex,
+          end - lastSlashIndex,
         );
       editorState.apply(transaction);
     }
@@ -96,7 +92,7 @@ class SelectionMenuItem {
         size: 18.0,
       ),
       keywords: keywords,
-      handler: (editorState, __, _) {
+      handler: (editorState, _, __) {
         final selection =
             editorState.service.selectionService.currentSelection.value;
         final textNodes = editorState
@@ -201,7 +197,9 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
   @override
   void initState() {
     super.initState();
+
     _showingItems = widget.items;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -257,7 +255,6 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
         ));
         itemWidgets = [];
       }
-
       itemWidgets.add(SelectionMenuItemWidget(
         item: items[i],
         isSelected: selectedIndex == i,
