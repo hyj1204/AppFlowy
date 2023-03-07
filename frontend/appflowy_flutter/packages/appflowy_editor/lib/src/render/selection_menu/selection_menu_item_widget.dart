@@ -57,6 +57,7 @@ class _SelectionMenuItemWidgetState extends State<SelectionMenuItemWidget> {
             ),
           ),
           onPressed: () {
+            print('onPressed');
             widget.item
                 .handler(widget.editorState, widget.menuService, context);
           },

@@ -5,14 +5,27 @@ import 'package:appflowy_editor/src/render/selection_menu/selection_menu_item_wi
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+typedef SelectionMenuItemHandler = void Function(
+  EditorState editorState,
+  SelectionMenuService menuService,
+  BuildContext context,
+);
+
 /// Selection Menu Item
 class SelectionMenuItem {
   SelectionMenuItem({
     required this.name,
     required this.icon,
     required this.keywords,
-    required this.handler,
-  });
+    required SelectionMenuItemHandler handler,
+  }) {
+    this.handler = (editorState, menuService, context) {
+      _deleteSlash(editorState);
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        handler(editorState, menuService, context);
+      });
+    };
+  }
 
   final String name;
   final Widget Function(EditorState editorState, bool onSelected) icon;
@@ -21,11 +34,34 @@ class SelectionMenuItem {
   ///
   /// The keywords are used to quickly retrieve items.
   final List<String> keywords;
-  final void Function(
+  late final void Function(
     EditorState editorState,
     SelectionMenuService menuService,
     BuildContext context,
   ) handler;
+
+  void _deleteSlash(EditorState editorState) {
+    final selectionService = editorState.service.selectionService;
+    final selection = selectionService.currentSelection.value;
+    final nodes = selectionService.currentSelectedNodes;
+    if (selection != null && nodes.length == 1) {
+      final node = nodes.first as TextNode;
+      print('node');
+      print(node.toPlainText());
+      final end = selection.start.offset;
+      print('end');
+      print(end);
+      final lastSlashIndex =
+          node.toPlainText().substring(0, end).lastIndexOf('/');
+      final transaction = editorState.transaction
+        ..deleteText(
+          node,
+          lastSlashIndex,
+          selection.start.offset - lastSlashIndex,
+        );
+      editorState.apply(transaction);
+    }
+  }
 
   /// Creates a selection menu entry for inserting a [Node].
   /// [name] and [iconData] define the appearance within the selection menu.
@@ -63,13 +99,15 @@ class SelectionMenuItem {
         size: 18.0,
       ),
       keywords: keywords,
-      handler: (editorState, _, __) {
+      handler: (editorState, __, _) {
+        print('handler');
         final selection =
             editorState.service.selectionService.currentSelection.value;
         final textNodes = editorState
             .service.selectionService.currentSelectedNodes
             .whereType<TextNode>();
         if (textNodes.length != 1 || selection == null) {
+          print('return SelectionMenuItem');
           return;
         }
         final textNode = textNodes.first;
@@ -78,9 +116,15 @@ class SelectionMenuItem {
         final bReplace = replace?.call(editorState, textNode) ?? false;
         final bInsertBefore =
             insertBefore?.call(editorState, textNode) ?? false;
+        print('bReplace');
+        print(bReplace);
+        print('bInsertBefore');
+        print(bInsertBefore);
 
         //default insert after
         var path = textNode.path.next;
+        print('path');
+        print(path);
         if (bReplace) {
           path = textNode.path;
         } else if (bInsertBefore) {
@@ -167,9 +211,8 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
   @override
   void initState() {
     super.initState();
-
+    print('init');
     _showingItems = widget.items;
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
@@ -215,6 +258,7 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
     List<SelectionMenuItem> items,
     int selectedIndex,
   ) {
+    print('_buildResultsWidget');
     List<Widget> columns = [];
     List<Widget> itemWidgets = [];
     for (var i = 0; i < items.length; i++) {
@@ -225,6 +269,9 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
         ));
         itemWidgets = [];
       }
+      print('itemWidgets');
+      print(itemWidgets);
+
       itemWidgets.add(SelectionMenuItemWidget(
         item: items[i],
         isSelected: selectedIndex == i,
@@ -277,12 +324,17 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
     ];
 
     if (event.logicalKey == LogicalKeyboardKey.enter) {
+      print('LogicalKeyboardKey.enter');
+      print('_selectedIndex');
+      print(_selectedIndex);
+      print('_showingItems.length');
+      print(_showingItems.length);
       if (0 <= _selectedIndex && _selectedIndex < _showingItems.length) {
-        _deleteLastCharacters(length: keyword.length + 1);
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          _showingItems[_selectedIndex]
-              .handler(widget.editorState, widget.menuService, context);
-        });
+        print('keyword.length');
+        print(keyword.length);
+        print(keyword);
+        _showingItems[_selectedIndex]
+            .handler(widget.editorState, widget.menuService, context);
         return KeyEventResult.handled;
       }
     } else if (event.logicalKey == LogicalKeyboardKey.escape) {
@@ -294,11 +346,15 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
       } else {
         keyword = keyword.substring(0, keyword.length - 1);
       }
+      print('_deleteLastCharacters');
       _deleteLastCharacters();
       return KeyEventResult.handled;
     } else if (event.character != null &&
         !arrowKeys.contains(event.logicalKey)) {
+      print('event.character');
+      print(event.character);
       keyword += event.character!;
+      print('_insertText');
       _insertText(event.character!);
       return KeyEventResult.handled;
     }
@@ -323,6 +379,7 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
   }
 
   void _deleteLastCharacters({int length = 1}) {
+    print('_deleteLastCharacters');
     final selectionService = widget.editorState.service.selectionService;
     final selection = selectionService.currentSelection.value;
     final nodes = selectionService.currentSelectedNodes;
@@ -344,6 +401,7 @@ class _SelectionMenuWidgetState extends State<SelectionMenuWidget> {
     final nodes =
         widget.editorState.service.selectionService.currentSelectedNodes;
     if (selection != null && nodes.length == 1) {
+      print('onSelectionUpdate');
       widget.onSelectionUpdate();
       final transaction = widget.editorState.transaction
         ..insertText(
