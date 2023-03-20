@@ -3,9 +3,9 @@ import 'package:appflowy/startup/startup.dart';
 import 'package:appflowy/workspace/presentation/home/home_stack.dart';
 import 'package:appflowy/workspace/presentation/home/menu/menu.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flowy_infra/theme_extension.dart';
 import 'package:flowy_infra/image.dart';
 import 'package:flowy_infra/size.dart';
+import 'package:flowy_infra/theme_extension/infra_theme_extension.dart';
 import 'package:flowy_infra_ui/style_widget/extension.dart';
 import 'package:flowy_infra_ui/style_widget/hover.dart';
 import 'package:flowy_infra_ui/style_widget/text.dart';
@@ -18,12 +18,14 @@ class MenuTrash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeStyle = Theme.of(context).extension<InfraThemeExtension>()!;
     return ValueListenableBuilder(
       valueListenable: getIt<MenuSharedState>().notifier,
       builder: (context, value, child) {
         return FlowyHover(
           style: HoverStyle(
-            hoverColor: AFThemeExtension.of(context).greySelect,
+            //demonstration purpose only
+            hoverColor: themeStyle.iconColor,
           ),
           isSelected: () => getIt<MenuSharedState>().latestOpenView == null,
           child: SizedBox(
@@ -43,6 +45,7 @@ class MenuTrash extends StatelessWidget {
   }
 
   Widget _render(BuildContext context) {
+    final themeStyle = Theme.of(context).extension<InfraThemeExtension>()!;
     return Row(
       children: [
         SizedBox(
@@ -54,7 +57,10 @@ class MenuTrash extends StatelessWidget {
           ),
         ),
         const HSpace(6),
-        FlowyText.medium(LocaleKeys.trash_text.tr()),
+        FlowyText.medium(
+          LocaleKeys.trash_text.tr(),
+          color: themeStyle.subTitleTextColor,
+        ),
       ],
     );
   }

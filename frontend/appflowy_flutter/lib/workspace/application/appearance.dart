@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flowy_infra/size.dart';
 import 'package:flowy_infra/theme.dart';
 import 'package:flowy_infra/theme_extension.dart';
+import 'package:flowy_infra/theme_extension/infra_theme_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -264,7 +265,7 @@ class AppearanceSettingsState with _$AppearanceSettingsState {
         surfaceVariant: theme.bg1,
         shadow: theme.shadow,
       ),
-      extensions: [
+      extensions: <ThemeExtension<dynamic>>[
         AFThemeExtension(
           warning: theme.yellow,
           success: theme.green,
@@ -296,7 +297,10 @@ class AppearanceSettingsState with _$AppearanceSettingsState {
             fontWeight: FontWeight.w400,
             fontColor: theme.shader3,
           ),
-        )
+        ),
+        brightness == Brightness.light
+            ? InfraThemeExtension.fromColorSchemeInLigtMode(theme)
+            : InfraThemeExtension.fromColorSchemeInDarkMode(theme),
       ],
     );
   }
