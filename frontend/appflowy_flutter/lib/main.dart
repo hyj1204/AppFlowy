@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:appflowy/mobile/mobile.dart';
 import 'package:appflowy_backend/log.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
@@ -27,6 +30,11 @@ Future<void> main() async {
     Log.error('Uncaught platform error', error, stack);
     return true;
   };
+
+  if (Platform.isIOS || Platform.isAndroid) {
+    runApp(const FlowyMobileApp());
+    return;
+  }
 
   await EasyLocalization.ensureInitialized();
   await hotKeyManager.unregisterAll();
