@@ -6,8 +6,8 @@ ThemeData getMobileThemeData() {
     brightness: Brightness.light,
     primary: Color(0xFF2DA2F6), //primary 100
     onPrimary: Colors.white,
+    secondary: Color(0xffC5C7CB), //icon & body 2
     // TODO(yijing): add color later
-    secondary: Colors.white,
     onSecondary: Colors.white,
     error: Color(0xffFB006D),
     onError: Color(0xffFB006D),
@@ -23,6 +23,7 @@ ThemeData getMobileThemeData() {
     primaryColor: mobileColorTheme.primary, //primary 100
     primaryColorLight: const Color(0xFF57B5F8), //primary 80
     dividerColor: mobileColorTheme.outline, //caption
+    hintColor: mobileColorTheme.outline,
     scaffoldBackgroundColor: mobileColorTheme.background,
     appBarTheme: AppBarTheme(
       foregroundColor: mobileColorTheme.onBackground,
@@ -104,9 +105,10 @@ ThemeData getMobileThemeData() {
         height: 1.10,
         letterSpacing: 0.13,
       ),
+      // Text widget deafult style
       // body2 14 Regular
+      // Default color [colorScheme.onBackground]
       bodyMedium: TextStyle(
-        color: Color(0xFFC5C7CB),
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 1.20,

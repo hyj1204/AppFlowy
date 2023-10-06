@@ -58,7 +58,8 @@ class MobileSignInScreen extends StatelessWidget {
                   // TODO(yijing): confirm the subtitle before release app
                   Text(
                     'You are in charge of your data and customizations.',
-                    style: style.textTheme.bodyMedium,
+                    style: style.textTheme.bodyMedium
+                        ?.copyWith(color: style.colorScheme.secondary),
                     textAlign: TextAlign.center,
                   ),
                   const Spacer(
@@ -74,7 +75,8 @@ class MobileSignInScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Text(
                           LocaleKeys.signIn_or.tr(),
-                          style: style.textTheme.bodyMedium,
+                          style: style.textTheme.bodyMedium
+                              ?.copyWith(color: style.colorScheme.secondary),
                         ),
                       ),
                       const Expanded(child: Divider()),
